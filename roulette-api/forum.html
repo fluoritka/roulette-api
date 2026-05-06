@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Premium Animated Roulette</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
             background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
@@ -11,7 +12,6 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            /* Везде устанавливаем Trebuchet MS и жирное начертание */
             font-family: 'Trebuchet MS', sans-serif;
             font-weight: bold;
             overflow: hidden;
@@ -89,7 +89,6 @@
             color: #333;
             outline: none;
             text-align: center;
-            /* Жирный шрифт для полей ввода */
             font-family: 'Trebuchet MS', sans-serif;
             font-weight: 900; 
         }
@@ -117,7 +116,6 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.3s;
-            /* Максимально жирный шрифт для кнопки */
             font-family: 'Trebuchet MS', sans-serif;
             font-weight: 900;
         }
@@ -129,6 +127,22 @@
         #spinBtn:disabled {
             background: #4b5563;
             color: #9ca3af;
+        }
+
+        /* ОКНО ВЫВОДА ПРИЗА */
+        #winDisplay {
+            display: none; /* По умолчанию скрыто */
+            margin-top: 20px;
+            color: #ffcc00;
+            font-size: 22px;
+            font-weight: 900;
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+            animation: fadeInWin 0.5s ease-out;
+        }
+
+        @keyframes fadeInWin {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -147,6 +161,8 @@
             <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
         </div>
     </div>
+
+    <div id="winDisplay">✨ ВЫИГРЫШ: <span id="prizeText">0</span> ✨</div>
 </div>
 
 <script>
@@ -169,11 +185,9 @@
             
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
-            // Устранение полосок через наложение сегментов
             ctx.arc(centerX, centerY, 205, angle, angle + arc + 0.001); 
             ctx.fill();
 
-            // Текст призов жирным Trebuchet MS
             ctx.save();
             ctx.translate(centerX, centerY);
             ctx.rotate(angle + arc / 2);
@@ -184,7 +198,6 @@
             ctx.restore();
         });
 
-        // Центр
         ctx.beginPath();
         ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
         ctx.fillStyle = '#161d2b';
@@ -207,8 +220,13 @@
         const code = document.getElementById('code').value.trim();
         const nick = document.getElementById('nickname').value.trim();
         const btn = document.getElementById('spinBtn');
+        const winDisplay = document.getElementById('winDisplay');
+        const prizeText = document.getElementById('prizeText');
 
         if(!code || !nick) return alert("Заполните поля!");
+        
+        // Скрываем прошлый выигрыш перед новым броском
+        winDisplay.style.display = 'none';
         btn.disabled = true;
 
         try {
@@ -234,7 +252,18 @@
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
-                alert(`ВЫИГРЫШ: ${data.prize}`);
+                // Заменяем alert на текстовое поле и конфетти
+                prizeText.innerText = data.prize;
+                winDisplay.style.display = 'block';
+
+                // Запуск эффекта конфетти
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    zIndex: 1000
+                });
+
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
