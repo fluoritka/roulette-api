@@ -2,264 +2,242 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titanium Roulette</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <title>Premium Animated Roulette</title>
     <style>
-        body { 
-            text-align:center;
-            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-            background:radial-gradient(circle at center,#1e293b,#0f172a); 
-            margin:0;
-            padding:20px;
-            color:#fff;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            min-height:100vh;
+        body {
+            /* Темный градиент на фоне */
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
             position: relative;
         }
 
+        /* АНИМАЦИЯ ФОНА */
         body::before {
             content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 200%; height: 200%;
+            width: 200%;
+            height: 200%;
             background: url('https://www.transparenttextures.com/patterns/stardust.png');
             opacity: 0.15;
-            animation: moveStarfield 60s linear infinite;
-            pointer-events: none;
-            z-index: -1;
+            animation: moveBackground 60s linear infinite;
         }
 
-        @keyframes moveStarfield {
+        @keyframes moveBackground {
             from { transform: translate(0, 0); }
             to { transform: translate(-50%, -50%); }
         }
 
-        .container{
-            position:relative;
-            display:inline-block;
-            filter:drop-shadow(0 15px 35px rgba(0,0,0,0.4));
-            margin-top:20px;
+        .main-container {
+            position: relative;
+            background: #161d2b; /* Цвет из примера */
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            width: 480px;
+            z-index: 10;
         }
 
-        .pointer{
-            position:absolute;
-            top:-12px;
-            left:50%;
-            transform:translateX(-50%);
-            width:0;
-            height:0;
-            border-left:20px solid transparent;
-            border-right:20px solid transparent;
-            border-top:35px solid #ef4444; 
-            z-index:10;
-            filter:drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 15px rgba(239,68,68,0.9));
+        .canvas-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            /* Свечение под колесом */
+            background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
         }
 
-        #canvas{
-            transition:transform 5s cubic-bezier(0.15,0,0.15,1);
-            border-radius:50%;
-            border:8px solid #334155;
-            background-color:#334155;
-            display:block;
+        #wheel {
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
+            border-radius: 50%;
+            border: 6px solid #2d3648; /* Тонкий матовый обод */
         }
 
-        .controls-wrapper{
-            display:flex;
-            flex-direction:column;
-            gap:12px;
-            margin-top:30px;
-            width:100%;
-            max-width:360px;
+        .pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 38px;
+            height: 38px;
+            background: #ff4d4d; /* Красный указатель */
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 30;
+            filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.6));
         }
 
-        .controls{
-            display:flex;
-            justify-content:center;
-            align-items:stretch;
-            box-shadow:0 10px 25px rgba(0,0,0,0.3);
-            border-radius:12px;
-            overflow:hidden;
-            width:100%;
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
         }
 
-        input{
-            flex:1;
-            padding:0 15px;
-            height:54px;
-            font-size:16px;
-            border:none;
-            outline:none;
-            background:#fff;
-            color:#1e293b;
-            font-weight:600;
-            box-sizing:border-box;
-            font-family:'Trebuchet MS',sans-serif;
+        /* Стиль инпутов как на скрине */
+        input {
+            width: 85%;
+            background: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            outline: none;
+            text-align: center;
         }
 
-        #nickname{
-            border-radius:12px;
-            box-shadow:0 5px 15px rgba(0,0,0,0.2);
-            width:100%;
+        .key-row {
+            display: flex;
+            width: 93%;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        button{
-            height:54px;
-            padding:0 25px;
-            font-size:15px;
-            font-weight:bold;
-            cursor:pointer;
-            background:linear-gradient(135deg,#6366f1,#a855f7);
-            color:#fff;
-            border:none;
-            transition:all 0.3s ease;
-            white-space:nowrap;
-            text-transform:uppercase;
-            font-family:'Trebuchet MS',sans-serif;
+        #code {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            text-align: center;
         }
 
-        button:hover:not(:disabled){filter:brightness(1.2);}
-        button:disabled{background:#475569;cursor:not-allowed;}
+        /* Фиолетовая кнопка */
+        #spinBtn {
+            background: #7c4dff;
+            color: #fff;
+            border: none;
+            padding: 0 25px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
 
-        #res{
-            margin-top:25px;
-            font-size:20px;
-            min-height:40px;
-            font-weight:700;
-            color:#fbbf24;
-            width:90%;
-            max-width:450px;
-            font-family:'Trebuchet MS',sans-serif;
+        #spinBtn:hover:not(:disabled) {
+            background: #6c3ce9;
+        }
+
+        #spinBtn:disabled {
+            background: #4b5563;
+            color: #9ca3af;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="pointer"></div>
-    <canvas id="canvas" width="360" height="360"></canvas>
-</div>
+<div class="main-container">
+    <div class="canvas-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="420" height="420"></canvas>
+    </div>
 
-<div class="controls-wrapper">
-    <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
-    <div class="controls">
-        <input type="text" id="promo-code" placeholder="ВАШ КЛЮЧ">
-        <button id="btn" onclick="spin()">КРУТИТЬ</button>
+    <div class="input-group">
+        <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
+        <div class="key-row">
+            <input type="text" id="code" placeholder="ВАШ КЛЮЧ">
+            <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
+        </div>
     </div>
 </div>
 
-<div id="res"></div>
-
 <script>
-    let currentRotation = 0;
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('wheel');
     const ctx = canvas.getContext('2d');
-    
-    // Функция отрисовки теперь принимает объекты с именами и цветами
-    function draw(prizes_list){    
-        const centerX=180,centerY=180,radius=175;    
-        const segments = prizes_list.length;
-        const arc=(Math.PI*2)/segments;    
-        
-        ctx.clearRect(0,0,360,360);    
-        
-        prizes_list.forEach((prize, i)=>{        
-            const angle=i*arc-Math.PI/2;        
-            ctx.beginPath();        
-            // Берем цвет из данных сервера (колонка D таблицы)
-            ctx.fillStyle = prize.color || "#444"; 
-            ctx.moveTo(centerX,centerY);        
-            ctx.arc(centerX,centerY,radius,angle,angle+arc);        
-            ctx.fill();        
-            
-            // Текст приза
-            ctx.save();        
-            ctx.translate(centerX,centerY);        
-            ctx.rotate(angle+arc/2);        
-            ctx.fillStyle="#fff";        
-            ctx.font="bold 12px sans-serif";        
-            ctx.textAlign="right";        
-            // Отрисовываем имя приза
-            ctx.fillText(String(prize.name).substring(0,14),radius-20,5);        
-            ctx.restore();    
-        });    
-        
-        // Центральный круг
-        ctx.beginPath();    
-        ctx.arc(centerX,centerY,15,0,Math.PI*2);    
-        ctx.fillStyle="#1e293b";    
+    const API_URL = "https://roulette-api-2.onrender.com";
+
+    function drawWheel(list) {
+        const segments = list.length;
+        const arc = (2 * Math.PI) / segments;
+        const centerX = 210;
+        const centerY = 210;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        list.forEach((item, i) => {
+            const angle = i * arc;
+            ctx.fillStyle = item.color || '#333';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, 205, angle, angle + arc);
+            ctx.fill();
+
+            // Текст призов
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle + arc / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 11px Arial";
+            ctx.fillText(item.name.toUpperCase(), 195, 5);
+            ctx.restore();
+        });
+
+        // Матовый центр
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+        ctx.fillStyle = '#161d2b';
         ctx.fill();
     }
 
-    async function init(){    
-        try{        
-            const r=await fetch('/get_prizes_list');        
-            const d=await r.json();        
-            // Передаем массив объектов целиком, чтобы draw видел и имена, и цвета
-            if(d.prizes) draw(d.prizes);    
-        }catch(e){        
-            console.error("Ошибка инициализации", e);
-        }
+    async function loadPrizes() {
+        try {
+            const res = await fetch(`${API_URL}/get_prizes_list`);
+            const data = await res.json();
+            drawWheel(data.prizes);
+        } catch(e) { console.error(e); }
     }
 
-    async function spin(){    
-        const btn=document.getElementById('btn'),resText=document.getElementById('res');    
-        const codeInput=document.getElementById('promo-code');    
-        const nickInput=document.getElementById('nickname');    
-        const code=codeInput.value.trim();    
-        const nick=nickInput.value.trim();    
-        
-        if(!nick){resText.style.color="#f87171";resText.innerText="⚠️ Введите никнейм!";return;}    
-        if(!code){resText.style.color="#f87171";resText.innerText="⚠️ Введите ключ!";return;}    
-        
-        btn.disabled=true;
-        resText.style.color="#94a3b8";
-        resText.innerText="⏳ Проверка...";    
-        
-        try{        
-            const r=await fetch('/spin',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({code,nickname:nick})
-            });        
-            const d=await r.json();        
-            
-            if(!r.ok){
-                resText.style.color="#f87171";
-                resText.innerText="❌ "+(d.error||"Ошибка");
-                btn.disabled=false;
+    async function doSpin() {
+        const code = document.getElementById('code').value.trim();
+        const nick = document.getElementById('nickname').value.trim();
+        const btn = document.getElementById('spinBtn');
+
+        if(!code || !nick) return alert("Заполните поля!");
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_URL}/spin`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ code, nickname: nick })
+            });
+            const data = await res.json();
+
+            if(!data.success) {
+                alert(data.message);
+                btn.disabled = false;
                 return;
-            }        
-            
-            resText.style.color="#6e8efb";
-            resText.innerText="🍀 Удача рядом...";        
-            
-            // Обновляем рулетку перед вращением актуальными цветами и именами
-            draw(d.prizes_list);        
-            
-            const arcDegree=360/d.total_segments;        
-            const targetAngle=360-(d.index*arcDegree+arcDegree/2);        
-            
-            currentRotation+=2160+((targetAngle-(currentRotation%360)+360)%360);        
-            canvas.style.transform=`rotate(${currentRotation}deg)`;        
-            
-            setTimeout(()=>{
-                resText.style.color="#fbbf24";
-                resText.innerHTML="✨ ВЫИГРЫШ: "+d.prize+" ✨";
-                confetti({particleCount:150,spread:70,origin:{y:0.7}});
-                btn.disabled=false;
-            },5200);    
-        }catch(e){
-            resText.style.color="#f87171";
-            resText.innerText="❗ Ошибка сервера";
-            btn.disabled=false;
+            }
+
+            const totalSegments = data.total_segments;
+            const segmentAngle = 360 / totalSegments;
+            const stopAngle = 270 - ((data.index * segmentAngle) + (segmentAngle / 2));
+            const totalRotation = 3600 + stopAngle;
+
+            canvas.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0.1, 1)';
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                alert(`ВЫИГРЫШ: ${data.prize}`);
+                canvas.style.transition = 'none';
+                canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
+                btn.disabled = false;
+                loadPrizes();
+            }, 6500);
+        } catch (e) {
+            alert("Ошибка связи");
+            btn.disabled = false;
         }
     }
 
-    init();
+    loadPrizes();
 </script>
 </body>
 </html>
