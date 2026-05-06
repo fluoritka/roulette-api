@@ -17,11 +17,10 @@
             flex-direction:column;
             align-items:center;
             min-height:100vh;
-            overflow: hidden; /* Чтобы фон не создавал полос прокрутки */
+            overflow: hidden;
             position: relative;
         }
 
-        /* АНИМИРОВАННЫЙ ФОН */
         body::before {
             content: '';
             position: absolute;
@@ -123,7 +122,6 @@
         }
 
         button:hover:not(:disabled){filter:brightness(1.2);}
-
         button:disabled{background:#475569;cursor:not-allowed;}
 
         #res{
@@ -134,9 +132,6 @@
             color:#fbbf24;
             width:90%;
             max-width:450px;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
             font-family:'Trebuchet MS',sans-serif;
         }
     </style>
@@ -163,29 +158,36 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Твои оригинальные цвета сегментов
-    const colors=["#6366f1","#8b5cf6","#d946ef","#f43f5e","#fb923c","#facc15","#4ade80","#2dd4bf","#38bdf8","#818cf8"];
-
-    function draw(labels){    
+    // Функция отрисовки теперь принимает объекты с именами и цветами
+    function draw(prizes_list){    
         const centerX=180,centerY=180,radius=175;    
-        const arc=(Math.PI*2)/labels.length;    
+        const segments = prizes_list.length;
+        const arc=(Math.PI*2)/segments;    
+        
         ctx.clearRect(0,0,360,360);    
-        labels.forEach((text,i)=>{        
+        
+        prizes_list.forEach((prize, i)=>{        
             const angle=i*arc-Math.PI/2;        
             ctx.beginPath();        
-            ctx.fillStyle=colors[i%colors.length];        
+            // Берем цвет из данных сервера (колонка D таблицы)
+            ctx.fillStyle = prize.color || "#444"; 
             ctx.moveTo(centerX,centerY);        
             ctx.arc(centerX,centerY,radius,angle,angle+arc);        
             ctx.fill();        
+            
+            // Текст приза
             ctx.save();        
             ctx.translate(centerX,centerY);        
             ctx.rotate(angle+arc/2);        
             ctx.fillStyle="#fff";        
             ctx.font="bold 12px sans-serif";        
             ctx.textAlign="right";        
-            ctx.fillText(String(text).substring(0,14),radius-20,5);        
+            // Отрисовываем имя приза
+            ctx.fillText(String(prize.name).substring(0,14),radius-20,5);        
             ctx.restore();    
         });    
+        
+        // Центральный круг
         ctx.beginPath();    
         ctx.arc(centerX,centerY,15,0,Math.PI*2);    
         ctx.fillStyle="#1e293b";    
@@ -196,9 +198,10 @@
         try{        
             const r=await fetch('/get_prizes_list');        
             const d=await r.json();        
-            if(d.names) draw(d.names);    
+            // Передаем массив объектов целиком, чтобы draw видел и имена, и цвета
+            if(d.prizes) draw(d.prizes);    
         }catch(e){        
-            draw(["?","?","?","?","?","?","?","?"]);    
+            console.error("Ошибка инициализации", e);
         }
     }
 
@@ -234,13 +237,12 @@
             resText.style.color="#6e8efb";
             resText.innerText="🍀 Удача рядом...";        
             
-            // Отрисовываем рулетку с актуальными призами из ответа
-            draw(d.all_names);        
+            // Обновляем рулетку перед вращением актуальными цветами и именами
+            draw(d.prizes_list);        
             
             const arcDegree=360/d.total_segments;        
             const targetAngle=360-(d.index*arcDegree+arcDegree/2);        
             
-            // Твоя логика расчета угла вращения
             currentRotation+=2160+((targetAngle-(currentRotation%360)+360)%360);        
             canvas.style.transform=`rotate(${currentRotation}deg)`;        
             
