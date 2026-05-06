@@ -5,22 +5,22 @@
     <title>Premium Animated Roulette</title>
     <style>
         body {
-            /* Темный градиент на фоне */
             background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            /* Устанавливаем Trebuchet MS как основной шрифт */
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
             overflow: hidden;
             position: relative;
         }
 
-        /* АНИМАЦИЯ ФОНА */
         body::before {
             content: '';
             position: absolute;
+            top: 0; left: 0;
             width: 200%;
             height: 200%;
             background: url('https://www.transparenttextures.com/patterns/stardust.png');
@@ -35,7 +35,7 @@
 
         .main-container {
             position: relative;
-            background: #161d2b; /* Цвет из примера */
+            background: #161d2b;
             padding: 30px;
             border-radius: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
@@ -49,14 +49,13 @@
             margin-bottom: 25px;
             display: flex;
             justify-content: center;
-            /* Свечение под колесом */
             background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
         }
 
         #wheel {
             filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
             border-radius: 50%;
-            border: 6px solid #2d3648; /* Тонкий матовый обод */
+            border: 6px solid #2d3648;
         }
 
         .pointer {
@@ -66,7 +65,7 @@
             transform: translateX(-50%);
             width: 38px;
             height: 38px;
-            background: #ff4d4d; /* Красный указатель */
+            background: #ff4d4d;
             clip-path: polygon(50% 100%, 0 0, 100% 0);
             z-index: 30;
             filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.6));
@@ -79,7 +78,6 @@
             align-items: center;
         }
 
-        /* Стиль инпутов как на скрине */
         input {
             width: 85%;
             background: #ffffff;
@@ -91,6 +89,7 @@
             color: #333;
             outline: none;
             text-align: center;
+            font-family: 'Trebuchet MS', sans-serif; /* Шрифт для инпутов */
         }
 
         .key-row {
@@ -108,7 +107,6 @@
             text-align: center;
         }
 
-        /* Фиолетовая кнопка */
         #spinBtn {
             background: #7c4dff;
             color: #fff;
@@ -118,6 +116,7 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.3s;
+            font-family: 'Trebuchet MS', sans-serif; /* Шрифт для кнопки */
         }
 
         #spinBtn:hover:not(:disabled) {
@@ -159,13 +158,21 @@
         const centerY = 210;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Включаем сглаживание для Canvas
+        ctx.imageSmoothingEnabled = true;
 
         list.forEach((item, i) => {
             const angle = i * arc;
             ctx.fillStyle = item.color || '#333';
+            
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, 205, angle, angle + arc);
+            
+            /* Чтобы убрать полоски между слотами, добавляем микро-перекрытие (0.001) 
+               к углу завершения дуги. Это убирает субпиксельные зазоры.
+            */
+            ctx.arc(centerX, centerY, 205, angle, angle + arc + 0.001); 
             ctx.fill();
 
             // Текст призов
@@ -174,7 +181,8 @@
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 11px Arial";
+            // Устанавливаем Trebuchet MS для текста внутри рулетки
+            ctx.font = "bold 12px 'Trebuchet MS', sans-serif"; 
             ctx.fillText(item.name.toUpperCase(), 195, 5);
             ctx.restore();
         });
@@ -184,6 +192,11 @@
         ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
         ctx.fillStyle = '#161d2b';
         ctx.fill();
+        
+        // Добавляем тонкую обводку центра, чтобы сгладить стык сегментов в середине
+        ctx.strokeStyle = '#161d2b';
+        ctx.lineWidth = 1;
+        ctx.stroke();
     }
 
     async function loadPrizes() {
@@ -218,6 +231,8 @@
 
             const totalSegments = data.total_segments;
             const segmentAngle = 360 / totalSegments;
+            
+            // Расчет угла с учетом того, что 0 градусов в Canvas — это "3 часа"
             const stopAngle = 270 - ((data.index * segmentAngle) + (segmentAngle / 2));
             const totalRotation = 3600 + stopAngle;
 
