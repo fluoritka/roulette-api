@@ -2,61 +2,50 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Premium Animated Roulette</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanium Roulette Premium</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body {
-            /* Темный градиент на фоне */
-            background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
+        body { 
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Глубокий радиальный градиент */
+            background: radial-gradient(circle at center, #1e293b, #0f172a); 
+            margin: 0;
+            padding: 20px;
+            color: #fff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* АНИМАЦИЯ ФОНА */
+        /* АНИМИРОВАННЫЙ ФОН */
         body::before {
             content: '';
             position: absolute;
-            width: 200%;
-            height: 200%;
+            top: 0; left: 0;
+            width: 200%; height: 200%;
             background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.15;
-            animation: moveBackground 60s linear infinite;
+            opacity: 0.12;
+            animation: moveStarfield 80s linear infinite;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        @keyframes moveBackground {
+        @keyframes moveStarfield {
             from { transform: translate(0, 0); }
             to { transform: translate(-50%, -50%); }
         }
 
-        .main-container {
+        .container {
             position: relative;
-            background: #161d2b; /* Цвет из примера */
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            width: 480px;
-            z-index: 10;
-        }
-
-        .canvas-wrapper {
-            position: relative;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: center;
-            /* Свечение под колесом */
-            background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
-        }
-
-        #wheel {
-            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
-            border-radius: 50%;
-            border: 6px solid #2d3648; /* Тонкий матовый обод */
+            display: inline-block;
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.5));
+            margin-top: 20px;
+            z-index: 1;
         }
 
         .pointer {
@@ -64,180 +53,232 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 38px;
-            height: 38px;
-            background: #ff4d4d; /* Красный указатель */
-            clip-path: polygon(50% 100%, 0 0, 100% 0);
-            z-index: 30;
-            filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.6));
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #ef4444; /* Красный указатель */
+            z-index: 10;
+            filter: drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 15px rgba(239,68,68,0.9));
         }
 
-        .input-group {
+        #canvas {
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
+            border-radius: 50%;
+            border: 8px solid #334155;
+            background-color: #334155;
+            display: block;
+        }
+
+        .controls-wrapper {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            align-items: center;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 360px;
+            z-index: 1;
         }
 
-        /* Стиль инпутов как на скрине */
-        input {
-            width: 85%;
-            background: #ffffff;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            outline: none;
-            text-align: center;
-        }
-
-        .key-row {
+        .controls {
             display: flex;
-            width: 93%;
-            background: #ffffff;
+            justify-content: center;
+            align-items: stretch;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border-radius: 12px;
             overflow: hidden;
+            width: 100%;
         }
 
-        #code {
+        input {
             flex: 1;
-            padding: 14px;
+            padding: 0 15px;
+            height: 54px;
+            font-size: 16px;
             border: none;
-            text-align: center;
+            outline: none;
+            background: #fff;
+            color: #1e293b;
+            font-weight: 600;
+            box-sizing: border-box;
+            font-family: 'Trebuchet MS', sans-serif;
         }
 
-        /* Фиолетовая кнопка */
-        #spinBtn {
-            background: #7c4dff;
+        #nickname {
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 100%;
+        }
+
+        /* Градиент кнопки из оригинального стиля */
+        button {
+            height: 54px;
+            padding: 0 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #6366f1, #a855f7); 
             color: #fff;
             border: none;
-            padding: 0 25px;
-            font-weight: 900;
-            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
             text-transform: uppercase;
-            transition: 0.3s;
+            font-family: 'Trebuchet MS', sans-serif;
         }
 
-        #spinBtn:hover:not(:disabled) {
-            background: #6c3ce9;
+        button:hover:not(:disabled) {
+            filter: brightness(1.2);
+            transform: translateY(-1px);
         }
 
-        #spinBtn:disabled {
-            background: #4b5563;
-            color: #9ca3af;
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        #res {
+            margin-top: 25px;
+            font-size: 20px;
+            min-height: 40px;
+            font-weight: 700;
+            color: #fbbf24;
+            width: 90%;
+            max-width: 450px;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+            font-family: 'Trebuchet MS', sans-serif;
         }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="canvas-wrapper">
-        <div class="pointer"></div>
-        <canvas id="wheel" width="420" height="420"></canvas>
-    </div>
+<div class="container">
+    <div class="pointer"></div>
+    <canvas id="canvas" width="360" height="360"></canvas>
+</div>
 
-    <div class="input-group">
-        <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
-        <div class="key-row">
-            <input type="text" id="code" placeholder="ВАШ КЛЮЧ">
-            <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
-        </div>
+<div class="controls-wrapper">
+    <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
+    <div class="controls">
+        <input type="text" id="promo-code" placeholder="ВАШ КЛЮЧ">
+        <button id="btn" onclick="spin()">КРУТИТЬ</button>
     </div>
 </div>
 
+<div id="res"></div>
+
 <script>
-    const canvas = document.getElementById('wheel');
+    let currentRotation = 0;
+    const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const API_URL = "https://roulette-api-2.onrender.com";
+    
+    // Оригинальные цвета сегментов
+    const colors = ["#6366f1", "#8b5cf6", "#d946ef", "#f43f5e", "#fb923c", "#facc15", "#4ade80", "#2dd4bf", "#38bdf8", "#818cf8"];
 
-    function drawWheel(list) {
-        const segments = list.length;
-        const arc = (2 * Math.PI) / segments;
-        const centerX = 210;
-        const centerY = 210;
+    function draw(labels) {
+        const centerX = 180, centerY = 180, radius = 175;
+        const arc = (Math.PI * 2) / labels.length;
+        ctx.clearRect(0, 0, 360, 360);
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        list.forEach((item, i) => {
-            const angle = i * arc;
-            ctx.fillStyle = item.color || '#333';
+        labels.forEach((text, i) => {
+            const angle = i * arc - Math.PI / 2;
             ctx.beginPath();
+            ctx.fillStyle = colors[i % colors.length];
             ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, 205, angle, angle + arc);
+            ctx.arc(centerX, centerY, radius, angle, angle + arc);
             ctx.fill();
 
-            // Текст призов
             ctx.save();
             ctx.translate(centerX, centerY);
             ctx.rotate(angle + arc / 2);
-            ctx.textAlign = "right";
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 11px Arial";
-            ctx.fillText(item.name.toUpperCase(), 195, 5);
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "right";
+            // Ограничение длины текста как в оригинале
+            ctx.fillText(String(text).substring(0, 14), radius - 20, 5);
             ctx.restore();
         });
 
-        // Матовый центр
+        // Центральный круг
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
-        ctx.fillStyle = '#161d2b';
+        ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+        ctx.fillStyle = "#1e293b";
         ctx.fill();
     }
 
-    async function loadPrizes() {
+    async function init() {
         try {
-            const res = await fetch(`${API_URL}/get_prizes_list`);
-            const data = await res.json();
-            drawWheel(data.prizes);
-        } catch(e) { console.error(e); }
+            const r = await fetch('/get_prizes_list');
+            const d = await r.json();
+            if (d.names) draw(d.names);
+        } catch (e) {
+            draw(["?", "?", "?", "?", "?", "?", "?", "?"]);
+        }
     }
 
-    async function doSpin() {
-        const code = document.getElementById('code').value.trim();
-        const nick = document.getElementById('nickname').value.trim();
-        const btn = document.getElementById('spinBtn');
+    async function spin() {
+        const btn = document.getElementById('btn');
+        const resText = document.getElementById('res');
+        const codeInput = document.getElementById('promo-code');
+        const nickInput = document.getElementById('nickname');
+        
+        const code = codeInput.value.trim();
+        const nick = nickInput.value.trim();
 
-        if(!code || !nick) return alert("Заполните поля!");
+        if (!nick) { resText.style.color = "#f87171"; resText.innerText = "⚠️ Введите никнейм!"; return; }
+        if (!code) { resText.style.color = "#f87171"; resText.innerText = "⚠️ Введите ключ!"; return; }
+
         btn.disabled = true;
+        resText.style.color = "#94a3b8";
+        resText.innerText = "⏳ Проверка...";
 
         try {
-            const res = await fetch(`${API_URL}/spin`, {
+            const r = await fetch('/spin', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, nickname: nick })
             });
-            const data = await res.json();
+            const d = await r.json();
 
-            if(!data.success) {
-                alert(data.message);
+            if (!r.ok) {
+                resText.style.color = "#f87171";
+                resText.innerText = "❌ " + (d.error || "Ошибка");
                 btn.disabled = false;
                 return;
             }
 
-            const totalSegments = data.total_segments;
-            const segmentAngle = 360 / totalSegments;
-            const stopAngle = 270 - ((data.index * segmentAngle) + (segmentAngle / 2));
-            const totalRotation = 3600 + stopAngle;
+            resText.style.color = "#6e8efb";
+            resText.innerText = "🍀 Удача рядом...";
+            
+            // Перерисовываем с актуальными названиями
+            draw(d.all_names);
 
-            canvas.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0.1, 1)';
-            canvas.style.transform = `rotate(${totalRotation}deg)`;
+            const arcDegree = 360 / d.total_segments;
+            const targetAngle = 360 - (d.index * arcDegree + arcDegree / 2);
+            
+            // Расчет вращения (минимум 6 полных кругов)
+            currentRotation += 2160 + ((targetAngle - (currentRotation % 360) + 360) % 360);
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
 
             setTimeout(() => {
-                alert(`ВЫИГРЫШ: ${data.prize}`);
-                canvas.style.transition = 'none';
-                canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
+                resText.style.color = "#fbbf24";
+                resText.innerHTML = "✨ ВЫИГРЫШ: " + d.prize + " ✨";
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.7 },
+                    colors: ['#6366f1', '#a855f7', '#fbbf24']
+                });
                 btn.disabled = false;
-                loadPrizes();
-            }, 6500);
+            }, 5200);
         } catch (e) {
-            alert("Ошибка связи");
+            resText.style.color = "#f87171";
+            resText.innerText = "❗ Ошибка сервера";
             btn.disabled = false;
         }
     }
 
-    loadPrizes();
+    init();
 </script>
 </body>
 </html>
