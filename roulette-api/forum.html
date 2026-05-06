@@ -5,14 +5,14 @@
     <title>Roulette Wheel - Forum Version</title>
     <style>
         body {
-            background-color: transparent; /* Убрали темный фон для вставки на форум */
+            background-color: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Убираем лишние полосы прокрутки */
+            overflow: hidden;
         }
         .main-container {
             background: #1a1d2e;
@@ -107,21 +107,21 @@
     const API_URL = "https://roulette-api-2.onrender.com";
 
     let prizes = [];
-    const colors = ['#5a61e5', '#7c3aed', '#9333ea', '#4f46e5', '#6366f1'];
 
     function drawWheel(list) {
         const segments = list.length;
         const arc = (2 * Math.PI) / segments;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        list.forEach((name, i) => {
+        list.forEach((item, i) => {
             const angle = i * arc;
-            ctx.fillStyle = colors[i % colors.length];
+            // Используем цвет из таблицы, если его нет - ставим дефолтный
+            ctx.fillStyle = item.color || '#5a61e5'; 
             ctx.beginPath();
             ctx.moveTo(190, 190);
             ctx.arc(190, 190, 180, angle, angle + arc);
             ctx.fill();
-            ctx.strokeStyle = '#2a2d3e';
+            ctx.strokeStyle = '#1a1d2e';
             ctx.lineWidth = 2;
             ctx.stroke();
 
@@ -131,7 +131,8 @@
             ctx.textAlign = "right";
             ctx.fillStyle = "white";
             ctx.font = "bold 11px Arial";
-            ctx.fillText(name, 170, 5);
+            // Текст приза
+            ctx.fillText(item.name, 170, 5);
             ctx.restore();
         });
     }
@@ -140,9 +141,12 @@
         try {
             const res = await fetch(`${API_URL}/get_prizes_list`);
             const data = await res.json();
-            prizes = data.names;
+            // Теперь API присылает массив объектов {name, color}
+            prizes = data.prizes; 
             drawWheel(prizes);
-        } catch(e) { console.error("Ошибка загрузки призов", e); }
+        } catch(e) { 
+            console.error("Ошибка загрузки призов", e); 
+        }
     }
 
     async function doSpin() {
@@ -184,6 +188,8 @@
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
+                // Перезагружаем призы, чтобы обновить остаток (stock) в памяти
+                loadPrizes(); 
             }, 5500);
 
         } catch (e) {
