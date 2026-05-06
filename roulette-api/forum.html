@@ -2,86 +2,120 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Roulette Wheel - Forum Version</title>
+    <title>Праздничная Рулетка - VIP Version</title>
     <style>
         body {
-            background-color: transparent;
+            /* БОЛЬШОЙ ПРАЗДНИЧНЫЙ ФОН: Космическое боке с золотыми искрами */
+            background: 
+                radial-gradient(circle, rgba(20, 25, 45, 1) 0%, rgba(10, 15, 30, 1) 100%),
+                url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 800 800"%3E%3Cg fill="none" stroke="%23fcd34d" stroke-width="1.5" stroke-opacity="0.15"%3E%3Ccircle cx="400" cy="400" r="1.5"%3E%3Canimate attributeName="r" from="1.5" to="5" dur="1.5s" repeatCount="indefinite"%3E%3C/animate%3E%3Canimate attributeName="stroke-opacity" from="0.15" to="0" dur="1.5s" repeatCount="indefinite"%3E%3C/animate%3E%3C/circle%3E%3Ccircle cx="400" cy="400" r="1.5" begin="0.75s"%3E%3Canimate attributeName="r" from="1.5" to="5" dur="1.5s" repeatCount="indefinite"%3E%3C/animate%3E%3Canimate attributeName="stroke-opacity" from="0.15" to="0" dur="1.5s" repeatCount="indefinite"%3E%3C/animate%3E%3C/circle%3E%3C/g%3E%3C/svg%3E');
+            background-size: cover;
+            background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
+            /* Праздничное золотое сияние всему экрану */
+            box-shadow: inset 0 0 200px rgba(252, 211, 77, 0.1); 
         }
+
         .main-container {
-            background: #1a1d2e;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: rgba(26, 29, 46, 0.95);
+            padding: 30px;
+            border-radius: 25px;
+            /* СВЕТЯЩИЙСЯ КОНТЕЙНЕР (Неоновый Glow Effect) */
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.3), 0 10px 40px rgba(0,0,0,0.6);
             text-align: center;
-            width: 420px;
+            width: 440px;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            backdrop-filter: blur(5px); /* Мягкое размытие фона за блоком */
         }
+
         .canvas-wrapper {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: center;
         }
+
         #wheel {
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.6));
             border-radius: 50%;
             max-width: 100%;
             height: auto;
+            transform: rotate(0deg);
         }
+
         .pointer {
             position: absolute;
-            top: -10px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 30px solid #ff4d4d;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #ff4d4d;
             z-index: 10;
+            filter: drop-shadow(0 0 5px #ff4d4d);
         }
+
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
+
         input {
             background: #ffffff;
             border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: bold;
             color: #333;
             outline: none;
+            transition: 0.3s;
         }
+        input:focus {
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+        }
+
         .key-row {
             display: flex;
             background: #ffffff;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .key-row input {
             flex: 1;
             border-radius: 0;
         }
+
         #spinBtn {
-            background: #8b5cf6;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
             color: white;
             border: none;
-            padding: 0 20px;
+            padding: 0 25px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
-            font-size: 14px;
+            transition: 0.4s ease;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        #spinBtn:hover { background: #7c3aed; }
-        #spinBtn:disabled { background: #4b5563; cursor: not-allowed; }
+        #spinBtn:hover { 
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+        #spinBtn:disabled { 
+            background: #4b5563; 
+            cursor: not-allowed; 
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +123,7 @@
 <div class="main-container">
     <div class="canvas-wrapper">
         <div class="pointer"></div>
-        <canvas id="wheel" width="380" height="380"></canvas>
+        <canvas id="wheel" width="400" height="400"></canvas>
     </div>
 
     <div class="input-group">
@@ -108,40 +142,73 @@
 
     let prizes = [];
 
+    // ГРАДИЕНТНЫЕ СЕКТОРА (Превращаем плоский цвет в градиент)
+    function createGradient(ctx, color, angle, arc) {
+        // Вычисляем вектор градиента от центра к краю сектора
+        const innerX = 200 + Math.cos(angle) * 10;
+        const innerY = 200 + Math.sin(angle) * 10;
+        const outerX = 200 + Math.cos(angle + arc / 2) * 200;
+        const outerY = 200 + Math.sin(angle + arc / 2) * 200;
+        
+        const grad = ctx.createRadialGradient(200, 200, 50, 200, 200, 195);
+        // Центральная часть чуть темнее
+        grad.addColorStop(0, '#101322'); 
+        // Яркий цвет из таблицы в середине
+        grad.addColorStop(0.5, color || '#5a61e5'); 
+        // Край сектора уходит в затемнение для глубины
+        grad.addColorStop(1, '#0a0d18'); 
+        return grad;
+    }
+
     function drawWheel(list) {
         const segments = list.length;
         const arc = (2 * Math.PI) / segments;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // УЛУЧШЕННОЕ ВИЗУАЛЬНОЕ КОЛЕСО (С глубиной)
         list.forEach((item, i) => {
             const angle = i * arc;
-            // Используем цвет из таблицы, если его нет - ставим дефолтный
-            ctx.fillStyle = item.color || '#5a61e5'; 
+            
+            // Задаем градиент для сектора
+            ctx.fillStyle = createGradient(ctx, item.color, angle, arc);
+            
             ctx.beginPath();
-            ctx.moveTo(190, 190);
-            ctx.arc(190, 190, 180, angle, angle + arc);
+            ctx.moveTo(200, 200);
+            ctx.arc(200, 200, 190, angle, angle + arc); // Радиус сектора
             ctx.fill();
-            ctx.strokeStyle = '#1a1d2e';
-            ctx.lineWidth = 2;
+            
+            // Разделительная линия (Более мягкая)
+            ctx.strokeStyle = 'rgba(26, 29, 46, 0.4)';
+            ctx.lineWidth = 1;
             ctx.stroke();
 
+            // ТЕКСТ ПРИЗА (Тот же стиль)
             ctx.save();
-            ctx.translate(190, 190);
+            ctx.translate(200, 200);
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
             ctx.fillStyle = "white";
             ctx.font = "bold 11px Arial";
-            // Текст приза
-            ctx.fillText(item.name, 170, 5);
+            ctx.fillText(item.name, 180, 5); // Сдвинули чуть дальше к краю
             ctx.restore();
         });
+        
+        // Внутренний темный круг для объема
+        ctx.beginPath();
+        ctx.arc(200, 200, 30, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0a0d18';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
+
+    // ... (остальные функции loadPrizes и doSpin остаются прежними) ...
 
     async function loadPrizes() {
         try {
             const res = await fetch(`${API_URL}/get_prizes_list`);
             const data = await res.json();
-            // Теперь API присылает массив объектов {name, color}
             prizes = data.prizes; 
             drawWheel(prizes);
         } catch(e) { 
@@ -188,7 +255,6 @@
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
-                // Перезагружаем призы, чтобы обновить остаток (stock) в памяти
                 loadPrizes(); 
             }, 5500);
 
