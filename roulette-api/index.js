@@ -6,10 +6,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Твой ID таблицы
+// ID твоей таблицы
 const SHEET_ID = "1EzLQpw13NtoJK2EEXRmRsezRvz3sAOOC_DXNFvXcQyw";
 
-// Подключаем ключи через Secret File, который ты создал на Render
+// Авторизация через Secret File на Render
 const auth = new google.auth.GoogleAuth({
   keyFile: './secrets.json', 
   scopes: ['https://www.googleapis.com/auth/spreadsheets']
@@ -17,39 +17,51 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({ version: 'v4', auth });
 
-// 1. Получаем список призов
+// 1. Получаем список призов (учитываем 4 колонки: имя, шанс, склад, цвет)
 async function getPrizes() {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
-    range: 'prizes!A2:B' 
+    range: 'prizes!A2:D' 
   });
   
   const rows = res.data.values;
-  // Если лист пустой, возвращаем пустой массив, чтобы код не падал
   if (!rows || rows.length === 0) return [];
 
   return rows
     .filter(r => r[0] && r[1]) // Убираем пустые строки
-    .map(r => ({ name: r[0], chance: Number(r[1]) }));
+    .map((r, index) => ({ 
+      name: r[0], 
+      chance: Number(r[1]), 
+      stock: Number(r[2]) || 0, // Колонка C: Количество
+      color: r[3] || "#333333", // Колонка D: Цвет
+      rowNum: index + 2         // Номер строки для обновления склада
+    }));
 }
 
-// 2. Рандом
+// 2. Рандом (выбираем только из тех, что есть в наличии)
 function weightedRandom(prizes) {
-  const total = prizes.reduce((sum, p) => sum + p.chance, 0);
+  const availablePrizes = prizes.filter(p => p.stock > 0);
+  if (availablePrizes.length === 0) return null;
+
+  const total = availablePrizes.reduce((sum, p) => sum + p.chance, 0);
   let rand = Math.random() * total;
-  for (let p of prizes) {
+  for (let p of availablePrizes) {
     if (rand < p.chance) return p;
     rand -= p.chance;
   }
-  return prizes[0]; // Страховка
+  return availablePrizes[0];
 }
 
-// 3. Список для колеса
+// 3. Эндпоинт для отрисовки колеса (отдает имена и цвета)
 app.get('/get_prizes_list', async (req, res) => {
   try {
     const prizes = await getPrizes();
-    if (prizes.length === 0) return res.json({ names: ["Ошибка таблицы"] });
-    res.json({ names: prizes.map(p => p.name) });
+    if (prizes.length === 0) return res.json({ prizes: [] });
+    
+    // Передаем и имя, и цвет для фронтенда
+    res.json({ 
+      prizes: prizes.map(p => ({ name: p.name, color: p.color })) 
+    });
   } catch (e) { 
     console.error("Ошибка в get_prizes_list:", e.message);
     res.status(500).json({ error: "Не удалось загрузить призы" }); 
@@ -61,6 +73,7 @@ app.post('/spin', async (req, res) => {
   const { code, nickname } = req.body;
 
   try {
+    // Проверка ключей
     const codesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range: 'keys!A2:D' 
@@ -72,34 +85,43 @@ app.post('/spin', async (req, res) => {
     if (rowIndex === -1) return res.json({ success: false, message: "Код не найден!" });
     if (rows[rowIndex][1] === "TRUE") return res.json({ success: false, message: "Код уже использован!" });
 
-    const prizes = await getPrizes();
-    if (prizes.length === 0) return res.status(500).json({ success: false, message: "Призы не настроены" });
+    // Получаем призы и выбираем победителя
+    const allPrizes = await getPrizes();
+    const prize = weightedRandom(allPrizes);
 
-    const prize = weightedRandom(prizes);
+    if (!prize) return res.json({ success: false, message: "Все призы на складе закончились!" });
+
+    const prizeIndexInList = allPrizes.findIndex(p => p.name === prize.name);
+
+    // ОБНОВЛЕНИЕ ТАБЛИЦЫ (За один раз обновляем и ключ, и склад)
     
-    // Проверка, что приз определился
-    if (!prize) throw new Error("Не удалось выбрать приз");
-
-    const prizeIndexInList = prizes.findIndex(p => p.name === prize.name);
-
-    const writeRow = rowIndex + 2;
+    // 1. Помечаем ключ как использованный
+    const keyRow = rowIndex + 2;
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
-      range: `keys!B${writeRow}:D${writeRow}`,
+      range: `keys!B${keyRow}:D${keyRow}`,
       valueInputOption: 'USER_ENTERED',
       resource: { values: [["TRUE", nickname, prize.name]] }
+    });
+
+    // 2. Уменьшаем количество призов на складе (Колонка C)
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `prizes!C${prize.rowNum}`,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values: [[prize.stock - 1]] }
     });
 
     res.json({
       success: true,
       prize: prize.name,
       index: prizeIndexInList,
-      total_segments: prizes.length
+      total_segments: allPrizes.length
     });
 
   } catch (e) {
     console.error("Критическая ошибка:", e.message);
-    res.status(500).json({ success: false, message: "Ошибка на сервере" });
+    res.status(500).json({ success: false, message: "Ошибка сервера" });
   }
 });
 
