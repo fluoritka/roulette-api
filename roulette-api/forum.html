@@ -2,30 +2,32 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Premium Roulette - Solid Edition</title>
+    <title>Grand Casino Roulette - Forum Version</title>
     <style>
-        /* Центрирование и праздничный фон */
+        /* Глобальные настройки для центрирования */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
+            /* Фон Grand Casino: Глубокий темно-бордовый с золотыми бликами */
+            background: radial-gradient(circle at center, #3a0e1c 0%, #1a060d 100%);
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
-        /* Эффект звездного неба на фоне */
+        /* Анимированные золотые частицы на фоне */
         body::before {
             content: '';
             position: absolute;
-            width: 200%;
-            height: 200%;
+            width: 150%;
+            height: 150%;
             background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.15;
-            animation: moveStar 60s linear infinite;
+            opacity: 0.1;
+            animation: moveStar 100s linear infinite;
         }
 
         @keyframes moveStar {
@@ -33,16 +35,19 @@
             to { transform: translate(-25%, -25%); }
         }
 
+        /* Премиальный блок рулетки */
         .main-container {
             position: relative;
-            background: rgba(20, 20, 30, 0.9);
-            backdrop-filter: blur(15px);
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
             padding: 30px;
             border-radius: 40px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+            /* Золотая "пыль" и свечение по краям */
+            border: 2px solid rgba(255, 215, 0, 0.4); 
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9), 
+                        inset 0 0 30px rgba(255, 215, 0, 0.05);
             text-align: center;
-            width: 400px;
+            width: 400px; /* Четкое центрирование в iframe */
             z-index: 10;
         }
 
@@ -53,25 +58,28 @@
             justify-content: center;
         }
 
+        /* Само колесо с массивным ободом */
         #wheel {
-            filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+            filter: drop-shadow(0 0 30px rgba(0,0,0,1));
             border-radius: 50%;
-            border: 8px solid #141414;
+            border: 10px solid #141414; /* Черный массивный корпус */
         }
 
+        /* Золотой указатель (стрелка) */
         .pointer {
             position: absolute;
-            top: -12px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 45px;
-            background: #ffcc00;
+            width: 45px;
+            height: 50px;
+            background: linear-gradient(to bottom, #ffd700 0%, #ffcc00 100%);
             clip-path: polygon(50% 100%, 0 0, 100% 0);
             z-index: 30;
-            filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.5));
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
         }
 
+        /* Стилизация полей ввода */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -79,16 +87,23 @@
         }
 
         input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 215, 0, 0.1);
             padding: 16px;
             border-radius: 15px;
             font-size: 14px;
             font-weight: bold;
-            color: #fff;
+            color: #ffcc00; /* Текст в инпутах - золотой */
             outline: none;
+            transition: 0.3s;
             text-align: center;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+        }
+
+        input:focus {
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
         }
 
         .key-row {
@@ -96,21 +111,29 @@
             gap: 10px;
         }
 
+        /* Кнопка "КРУТИТЬ" - Роскошная золотая */
         #spinBtn {
-            background: #ffcc00;
-            color: #000;
+            background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%);
+            color: #8b0000; /* Красный текст на золотом фоне */
             border: none;
             padding: 0 25px;
             border-radius: 15px;
             font-weight: 900;
             cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase;
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        #spinBtn:hover:not(:disabled) {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.5);
         }
 
         #spinBtn:disabled {
-            background: #333;
-            color: #666;
+            background: #2a2a2a;
+            color: #555;
+            box-shadow: none;
             cursor: not-allowed;
         }
     </style>
@@ -126,7 +149,7 @@
     <div class="input-group">
         <input type="text" id="nickname" placeholder="NICKNAME">
         <div class="key-row">
-            <input type="text" id="code" placeholder="KEY" style="flex: 1;">
+            <input type="text" id="code" placeholder="ACCESS KEY" style="flex: 1;">
             <button id="spinBtn" onclick="doSpin()">SPIN</button>
         </div>
     </div>
@@ -139,6 +162,10 @@
 
     let prizes = [];
 
+    // ГРАДИЕНТЫ ДЛЯ СЕКТОРОВ
+    const goldGrad = '#ffd700'; // Текстурированное золото
+    const redGrad = '#8b0000';  // Глубокий красный
+
     function drawWheel(list) {
         const segments = list.length;
         const arc = (2 * Math.PI) / segments;
@@ -146,52 +173,68 @@
 
         list.forEach((item, i) => {
             const angle = i * arc;
-            
-            // ЧИСТЫЙ ЦВЕТ СЕКТОРА (без градиента)
-            ctx.fillStyle = item.color || '#444';
+            const isGoldSegment = i % 2 === 0;
+
+            // Рисуем сектор
+            ctx.fillStyle = isGoldSegment ? goldGrad : redGrad;
             ctx.beginPath();
             ctx.moveTo(190, 190);
             ctx.arc(190, 190, 185, angle, angle + arc);
             ctx.fill();
 
-            // Золотая обводка секторов для четкости
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
+            // Золотая разделительная нить
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Текст приза
+            // ТЕКСТ ПРИЗА
             ctx.save();
             ctx.translate(190, 190);
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 10px Arial";
+            
+            // Логика текста: Красный на золоте, Бело-Золотой на красном
+            if (isGoldSegment) {
+                ctx.fillStyle = "#8b0000"; // Красный текст
+            } else {
+                ctx.fillStyle = "#fff"; // Бело-Золотой текст
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "rgba(255, 215, 0, 0.8)"; 
+            }
+
+            ctx.font = "bold 11px Arial";
             ctx.fillText(item.name.toUpperCase(), 170, 5);
             ctx.restore();
         });
 
-        // Центр колеса
+        // Центральная «золотая» втулка
         ctx.beginPath();
-        ctx.arc(190, 190, 15, 0, Math.PI * 2);
+        ctx.arc(190, 190, 20, 0, Math.PI * 2);
         ctx.fillStyle = '#141414';
         ctx.fill();
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.stroke();
     }
 
     async function loadPrizes() {
         try {
             const res = await fetch(`${API_URL}/get_prizes_list`);
             const data = await res.json();
-            prizes = data.prizes;
+            prizes = data.prizes; 
             drawWheel(prizes);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Error", e); }
     }
 
     async function doSpin() {
-        const code = document.getElementById('code').value.trim();
-        const nick = document.getElementById('nickname').value.trim();
+        const codeInput = document.getElementById('code');
+        const nickInput = document.getElementById('nickname');
         const btn = document.getElementById('spinBtn');
 
-        if(!code || !nick) return alert("Enter data!");
+        const code = codeInput.value.trim();
+        const nick = nickInput.value.trim();
+
+        if(!code || !nick) return alert("Please enter all data!");
         btn.disabled = true;
 
         try {
@@ -216,14 +259,15 @@
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
-                alert(`WIN: ${data.prize}`);
+                alert(`CONGRATULATIONS! YOU WON: ${data.prize}`);
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
-                loadPrizes();
+                loadPrizes(); 
             }, 6500);
+
         } catch (e) {
-            alert("Error");
+            alert("Connection error");
             btn.disabled = false;
         }
     }
