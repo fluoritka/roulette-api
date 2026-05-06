@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Roulette Wheel - Forum Version</title>
+    <style>
+        body {
+            background-color: transparent; /* Убрали темный фон для вставки на форум */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Убираем лишние полосы прокрутки */
+        }
+        .main-container {
+            background: #1a1d2e;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 420px;
+        }
+        .canvas-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        #wheel {
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            border-radius: 50%;
+            max-width: 100%;
+            height: auto;
+        }
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff4d4d;
+            z-index: 10;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        input {
+            background: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            outline: none;
+        }
+        .key-row {
+            display: flex;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .key-row input {
+            flex: 1;
+            border-radius: 0;
+        }
+        #spinBtn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        #spinBtn:hover { background: #7c3aed; }
+        #spinBtn:disabled { background: #4b5563; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="canvas-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="380" height="380"></canvas>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
+        <div class="key-row">
+            <input type="text" id="code" placeholder="ВАШ КЛЮЧ">
+            <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const API_URL = "https://roulette-api-2.onrender.com";
+
+    let prizes = [];
+    const colors = ['#5a61e5', '#7c3aed', '#9333ea', '#4f46e5', '#6366f1'];
+
+    function drawWheel(list) {
+        const segments = list.length;
+        const arc = (2 * Math.PI) / segments;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        list.forEach((name, i) => {
+            const angle = i * arc;
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.beginPath();
+            ctx.moveTo(190, 190);
+            ctx.arc(190, 190, 180, angle, angle + arc);
+            ctx.fill();
+            ctx.strokeStyle = '#2a2d3e';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(190, 190);
+            ctx.rotate(angle + arc / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "white";
+            ctx.font = "bold 11px Arial";
+            ctx.fillText(name, 170, 5);
+            ctx.restore();
+        });
+    }
+
+    async function loadPrizes() {
+        try {
+            const res = await fetch(`${API_URL}/get_prizes_list`);
+            const data = await res.json();
+            prizes = data.names;
+            drawWheel(prizes);
+        } catch(e) { console.error("Ошибка загрузки призов", e); }
+    }
+
+    async function doSpin() {
+        const codeInput = document.getElementById('code');
+        const nickInput = document.getElementById('nickname');
+        const btn = document.getElementById('spinBtn');
+
+        const code = codeInput.value.trim();
+        const nick = nickInput.value.trim();
+
+        if(!code || !nick) return alert("Введите ник и ключ!");
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_URL}/spin`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ code, nickname: nick })
+            });
+            const data = await res.json();
+
+            if(!data.success) {
+                alert(data.message);
+                btn.disabled = false;
+                return;
+            }
+
+            const totalSegments = data.total_segments;
+            const segmentAngle = 360 / totalSegments;
+            const prizeCenterAngle = (data.index * segmentAngle) + (segmentAngle / 2);
+            const stopAngle = 270 - prizeCenterAngle;
+            const totalRotation = 3600 + stopAngle;
+
+            canvas.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.15, 1)';
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                alert(`Поздравляем! Вы выиграли: ${data.prize}`);
+                canvas.style.transition = 'none';
+                canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
+                btn.disabled = false;
+            }, 5500);
+
+        } catch (e) {
+            alert("Ошибка связи с сервером");
+            btn.disabled = false;
+        }
+    }
+
+    loadPrizes();
+</script>
+</body>
+</html>
