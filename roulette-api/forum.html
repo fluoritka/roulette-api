@@ -2,101 +2,72 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Premium Roulette - Grand Casino</title>
+    <title>Roulette Edition</title>
     <style>
         body {
-            /* Глубокий премиальный фон с градиентом */
-            background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d15 100%);
+            background: #0d0d15;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            position: relative;
-        }
-
-        /* Анимированные золотые блики на фоне */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.2;
-            animation: moveBackground 50s linear infinite;
-        }
-
-        @keyframes moveBackground {
-            from { transform: translate(0, 0); }
-            to { transform: translate(-50%, -50%); }
         }
 
         .main-container {
             position: relative;
-            background: rgba(20, 20, 30, 0.8);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 215, 0, 0.2); /* Тонкая золотая рамка */
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            background: #161625;
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
             text-align: center;
-            width: 460px;
-            z-index: 5;
+            width: 480px; /* Немного расширил контейнер для крупного колеса */
         }
 
         .canvas-wrapper {
             position: relative;
-            margin-bottom: 30px;
-            padding: 10px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
         }
 
         #wheel {
-            filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+            /* Убрал внешнюю обводку, оставил только тень */
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
             border-radius: 50%;
-            border: 8px solid #1a1a1a; /* Массивный обод */
         }
 
+        /* УКАЗАТЕЛЬ С ЭФФЕКТОМ СВЕЧЕНИЯ */
         .pointer {
             position: absolute;
             top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            background: #ffcc00;
+            width: 36px;
+            height: 36px;
+            background: #ff4444; /* Яркий красный */
             clip-path: polygon(50% 100%, 0 0, 100% 0);
             z-index: 20;
-            filter: drop-shadow(0 0 10px #ffcc00);
+            /* Неоновое свечение указателя */
+            filter: drop-shadow(0 0 8px #ff4444);
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 16px;
-            border-radius: 12px;
+            background: #1f1f33;
+            border: 1px solid #2d2d44; /* Матовая нейтральная граница */
+            padding: 14px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: bold;
             color: #fff;
             outline: none;
-            transition: 0.3s;
             text-align: center;
-            letter-spacing: 1px;
-        }
-
-        input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #ffcc00;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
         }
 
         .key-row {
@@ -105,27 +76,25 @@
         }
 
         #spinBtn {
-            background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
-            color: #000;
+            background: #7c4dff; /* Фиолетовый как на референсе */
+            color: #fff;
             border: none;
-            padding: 0 30px;
-            border-radius: 12px;
-            font-weight: 900;
+            padding: 0 25px;
+            border-radius: 10px;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
             text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.4);
         }
 
-        #spinBtn:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(255, 153, 0, 0.6);
+        #spinBtn:hover {
+            background: #6c3ce9;
+            transform: translateY(-1px);
         }
 
         #spinBtn:disabled {
             background: #333;
-            color: #666;
-            box-shadow: none;
+            color: #777;
         }
     </style>
 </head>
@@ -134,11 +103,11 @@
 <div class="main-container">
     <div class="canvas-wrapper">
         <div class="pointer"></div>
-        <canvas id="wheel" width="400" height="400"></canvas>
+        <canvas id="wheel" width="440" height="440"></canvas>
     </div>
 
     <div class="input-group">
-        <input type="text" id="nickname" placeholder="NICKNAME">
+        <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
         <div class="key-row">
             <input type="text" id="code" placeholder="КЛЮЧ ДОСТУПА" style="flex: 1;">
             <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
@@ -153,56 +122,45 @@
 
     let prizes = [];
 
-    // Создаем эффект неонового градиента для сектора
-    function getNeonGradient(color, angle, arc) {
-        const grad = ctx.createRadialGradient(200, 200, 0, 200, 200, 200);
-        grad.addColorStop(0, '#1a1a2e'); // Темный центр
-        grad.addColorStop(0.85, color);  // Основной цвет из таблицы
-        grad.addColorStop(1, '#000');    // Затемнение у края
-        return grad;
-    }
-
     function drawWheel(list) {
         const segments = list.length;
         const arc = (2 * Math.PI) / segments;
+        const centerX = 220; // Центр для 440px
+        const centerY = 220;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         list.forEach((item, i) => {
             const angle = i * arc;
             
-            // Сектор
-            ctx.fillStyle = getNeonGradient(item.color || '#444', angle, arc);
+            // СЕКТОР (Просто цвет без градиента)
+            ctx.fillStyle = item.color || '#333';
             ctx.beginPath();
-            ctx.moveTo(200, 200);
-            ctx.arc(200, 200, 195, angle, angle + arc);
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, 215, angle, angle + arc); // Увеличил радиус до 215
             ctx.fill();
 
-            // Золотая разделительная нить
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+            // Тонкие черные разделители
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Текст с эффектом свечения
+            // ТЕКСТ
             ctx.save();
-            ctx.translate(200, 200);
+            ctx.translate(centerX, centerY);
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
             ctx.fillStyle = "#fff";
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = item.color;
-            ctx.font = "bold 10px Arial";
-            ctx.fillText(item.name.toUpperCase(), 175, 5);
+            ctx.font = "bold 11px Arial";
+            ctx.fillText(item.name.toUpperCase(), 200, 5);
             ctx.restore();
         });
 
-        // Центральная «золотая» втулка
+        // ЦЕНТРАЛЬНЫЙ КРУГ (Матовый)
         ctx.beginPath();
-        ctx.arc(200, 200, 25, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
         ctx.fillStyle = '#0d0d15';
         ctx.fill();
-        ctx.strokeStyle = '#ffcc00';
-        ctx.lineWidth = 3;
-        ctx.stroke();
     }
 
     async function loadPrizes() {
@@ -211,18 +169,15 @@
             const data = await res.json();
             prizes = data.prizes;
             drawWheel(prizes);
-        } catch(e) { console.error("API Error", e); }
+        } catch(e) { console.error(e); }
     }
 
     async function doSpin() {
-        const codeInput = document.getElementById('code');
-        const nickInput = document.getElementById('nickname');
+        const code = document.getElementById('code').value.trim();
+        const nick = document.getElementById('nickname').value.trim();
         const btn = document.getElementById('spinBtn');
 
-        const code = codeInput.value.trim();
-        const nick = nickInput.value.trim();
-
-        if(!code || !nick) return alert("Введите данные!");
+        if(!code || !nick) return alert("Заполните поля!");
         btn.disabled = true;
 
         try {
@@ -241,11 +196,10 @@
 
             const totalSegments = data.total_segments;
             const segmentAngle = 360 / totalSegments;
-            const prizeCenterAngle = (data.index * segmentAngle) + (segmentAngle / 2);
-            const stopAngle = 270 - prizeCenterAngle;
+            const stopAngle = 270 - ((data.index * segmentAngle) + (segmentAngle / 2));
             const totalRotation = 3600 + stopAngle;
 
-            canvas.style.transition = 'transform 6s cubic-bezier(0.2, 0, 0.1, 1)';
+            canvas.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0, 1)';
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
@@ -254,10 +208,9 @@
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
                 loadPrizes();
-            }, 6500);
-
+            }, 5500);
         } catch (e) {
-            alert("Сервер недоступен");
+            alert("Ошибка");
             btn.disabled = false;
         }
     }
