@@ -2,99 +2,106 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Roulette Edition</title>
+    <title>Forum Roulette Style</title>
     <style>
         body {
-            background: #0d0d15;
+            background: #161d2b; /* Цвет фона как на скрине */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
+            font-family: 'Arial', sans-serif;
         }
 
         .main-container {
-            position: relative;
-            background: #161625;
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            background: #161d2b;
+            padding: 40px;
             text-align: center;
-            width: 480px; /* Немного расширил контейнер для крупного колеса */
+            width: 500px;
         }
 
         .canvas-wrapper {
             position: relative;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
+            margin-bottom: 30px;
+            display: inline-block;
         }
 
         #wheel {
-            /* Убрал внешнюю обводку, оставил только тень */
-            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
             border-radius: 50%;
+            border: 10px solid #2d3648; /* Серая рамка вокруг колеса */
         }
 
-        /* УКАЗАТЕЛЬ С ЭФФЕКТОМ СВЕЧЕНИЯ */
         .pointer {
             position: absolute;
-            top: -10px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 36px;
-            height: 36px;
-            background: #ff4444; /* Яркий красный */
+            width: 40px;
+            height: 40px;
+            background: #ff4d4d; /* Красный треугольник */
             clip-path: polygon(50% 100%, 0 0, 100% 0);
             z-index: 20;
-            /* Неоновое свечение указателя */
-            filter: drop-shadow(0 0 8px #ff4444);
+            filter: drop-shadow(0 0 10px rgba(255, 77, 77, 0.5));
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
+            align-items: center;
         }
 
-        input {
-            background: #1f1f33;
-            border: 1px solid #2d2d44; /* Матовая нейтральная граница */
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 14px;
-            color: #fff;
-            outline: none;
-            text-align: center;
-        }
-
-        .key-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        #spinBtn {
-            background: #7c4dff; /* Фиолетовый как на референсе */
-            color: #fff;
+        /* Поле Никнейм */
+        #nickname {
+            width: 350px;
+            padding: 12px 20px;
+            border-radius: 25px; /* Полное закругление */
             border: none;
-            padding: 0 25px;
-            border-radius: 10px;
+            font-size: 14px;
             font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
+            color: #333;
+            background: #fff;
             text-transform: uppercase;
         }
 
+        /* Группа Ключ + Кнопка */
+        .key-row {
+            display: flex;
+            width: 390px;
+            background: #fff;
+            border-radius: 10px; /* Общее закругление для ряда */
+            overflow: hidden;
+        }
+
+        #code {
+            flex: 1;
+            border: none;
+            padding: 15px;
+            font-size: 14px;
+            outline: none;
+            text-transform: uppercase;
+            color: #333;
+        }
+
+        #spinBtn {
+            background: linear-gradient(90deg, #8e54ff 0%, #7033ff 100%);
+            color: #fff;
+            border: none;
+            padding: 0 30px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
         #spinBtn:hover {
-            background: #6c3ce9;
-            transform: translateY(-1px);
+            opacity: 0.9;
         }
 
         #spinBtn:disabled {
-            background: #333;
-            color: #777;
+            background: #555;
         }
     </style>
 </head>
@@ -103,13 +110,13 @@
 <div class="main-container">
     <div class="canvas-wrapper">
         <div class="pointer"></div>
-        <canvas id="wheel" width="440" height="440"></canvas>
+        <canvas id="wheel" width="400" height="400"></canvas>
     </div>
 
     <div class="input-group">
         <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
         <div class="key-row">
-            <input type="text" id="code" placeholder="КЛЮЧ ДОСТУПА" style="flex: 1;">
+            <input type="text" id="code" placeholder="ВАШ КЛЮЧ">
             <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
         </div>
     </div>
@@ -120,46 +127,36 @@
     const ctx = canvas.getContext('2d');
     const API_URL = "https://roulette-api-2.onrender.com";
 
-    let prizes = [];
-
+    // Отрисовка колеса с плоскими цветами без градиентов
     function drawWheel(list) {
         const segments = list.length;
         const arc = (2 * Math.PI) / segments;
-        const centerX = 220; // Центр для 440px
-        const centerY = 220;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         list.forEach((item, i) => {
             const angle = i * arc;
             
-            // СЕКТОР (Просто цвет без градиента)
-            ctx.fillStyle = item.color || '#333';
+            ctx.fillStyle = item.color || '#444';
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, 215, angle, angle + arc); // Увеличил радиус до 215
+            ctx.moveTo(200, 200);
+            ctx.arc(200, 200, 200, angle, angle + arc);
             ctx.fill();
 
-            // Тонкие черные разделители
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            // ТЕКСТ
+            // Текст
             ctx.save();
-            ctx.translate(centerX, centerY);
+            ctx.translate(200, 200);
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 11px Arial";
-            ctx.fillText(item.name.toUpperCase(), 200, 5);
+            ctx.font = "bold 12px Arial";
+            ctx.fillText(item.name.toUpperCase(), 180, 5);
             ctx.restore();
         });
 
-        // ЦЕНТРАЛЬНЫЙ КРУГ (Матовый)
+        // Черный центр
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
-        ctx.fillStyle = '#0d0d15';
+        ctx.arc(200, 200, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#161d2b';
         ctx.fill();
     }
 
@@ -167,17 +164,16 @@
         try {
             const res = await fetch(`${API_URL}/get_prizes_list`);
             const data = await res.json();
-            prizes = data.prizes;
-            drawWheel(prizes);
+            drawWheel(data.prizes);
         } catch(e) { console.error(e); }
     }
 
     async function doSpin() {
         const code = document.getElementById('code').value.trim();
         const nick = document.getElementById('nickname').value.trim();
-        const btn = document.getElementById('spinBtn');
+        if(!code || !nick) return alert("Введите данные!");
 
-        if(!code || !nick) return alert("Заполните поля!");
+        const btn = document.getElementById('spinBtn');
         btn.disabled = true;
 
         try {
@@ -199,7 +195,7 @@
             const stopAngle = 270 - ((data.index * segmentAngle) + (segmentAngle / 2));
             const totalRotation = 3600 + stopAngle;
 
-            canvas.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0, 1)';
+            canvas.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.15, 1)';
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
@@ -208,9 +204,9 @@
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
                 loadPrizes();
-            }, 5500);
+            }, 6500);
         } catch (e) {
-            alert("Ошибка");
+            alert("Ошибка сети");
             btn.disabled = false;
         }
     }
