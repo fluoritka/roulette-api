@@ -2,84 +2,63 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Grand Casino Roulette - Forum Version</title>
+    <title>Grand Casino Edition - Forum</title>
     <style>
-        /* Глобальные настройки для центрирования */
+        /* Глобальные настройки для идеального центрирования на форуме */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            /* Фон Grand Casino: Глубокий темно-бордовый с золотыми бликами */
-            background: radial-gradient(circle at center, #3a0e1c 0%, #1a060d 100%);
+            background: transparent; /* Чтобы форум подсвечивал фон */
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Анимированные золотые частицы на фоне */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.1;
-            animation: moveStar 100s linear infinite;
-        }
-
-        @keyframes moveStar {
-            from { transform: translate(0, 0); }
-            to { transform: translate(-25%, -25%); }
-        }
-
-        /* Премиальный блок рулетки */
+        /* ГЛАВНЫЙ КОРПУС РУЛЕТКИ (Матовый темный) */
         .main-container {
             position: relative;
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 40px;
-            /* Золотая "пыль" и свечение по краям */
-            border: 2px solid rgba(255, 215, 0, 0.4); 
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9), 
-                        inset 0 0 30px rgba(255, 215, 0, 0.05);
+            background: #1a1a2e; /* Очень темный сине-серый */
+            padding: 35px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             text-align: center;
-            width: 400px; /* Четкое центрирование в iframe */
+            width: 420px; /* Идеально для iframe 460px */
             z-index: 10;
         }
 
         .canvas-wrapper {
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: center;
         }
 
-        /* Само колесо с массивным ободом */
+        /* Само колесо с четким ободом */
         #wheel {
-            filter: drop-shadow(0 0 30px rgba(0,0,0,1));
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
             border-radius: 50%;
-            border: 10px solid #141414; /* Черный массивный корпус */
+            border: 8px solid #141414; /* Темный обод */
         }
 
-        /* Золотой указатель (стрелка) */
+        /* Золотой указатель (Стрелка) */
         .pointer {
             position: absolute;
             top: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 45px;
-            height: 50px;
+            width: 40px;
+            height: 45px;
             background: linear-gradient(to bottom, #ffd700 0%, #ffcc00 100%);
             clip-path: polygon(50% 100%, 0 0, 100% 0);
             z-index: 30;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
         }
 
-        /* Стилизация полей ввода */
+        /* ПОЛЯ ВВОДА И КНОПКА */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -87,23 +66,21 @@
         }
 
         input {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            background: #ffffff;
+            border: none;
             padding: 16px;
-            border-radius: 15px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: bold;
-            color: #ffcc00; /* Текст в инпутах - золотой */
+            color: #d4af37; /* Золотисто-желтый текст в инпутах */
             outline: none;
-            transition: 0.3s;
             text-align: center;
             letter-spacing: 1.5px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
         }
 
         input:focus {
-            border-color: #ffd700;
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
         .key-row {
@@ -111,28 +88,29 @@
             gap: 10px;
         }
 
-        /* Кнопка "КРУТИТЬ" - Роскошная золотая */
+        /* ФИОЛЕТОВАЯ КНОПКА «КРУТИТЬ» */
         #spinBtn {
-            background: linear-gradient(135deg, #ffd700 0%, #ffcc00 100%);
-            color: #8b0000; /* Красный текст на золотом фоне */
+            background: #8b5cf6;
+            color: #ffffff; /* Белый текст на фиолетовом */
             border: none;
             padding: 0 25px;
-            border-radius: 15px;
+            border-radius: 10px;
             font-weight: 900;
             cursor: pointer;
             transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase;
-            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
         }
 
         #spinBtn:hover:not(:disabled) {
             transform: scale(1.05) translateY(-2px);
-            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.5);
         }
 
         #spinBtn:disabled {
-            background: #2a2a2a;
-            color: #555;
+            background: #4b5563;
+            color: #9ca3af;
             box-shadow: none;
             cursor: not-allowed;
         }
@@ -147,10 +125,10 @@
     </div>
 
     <div class="input-group">
-        <input type="text" id="nickname" placeholder="NICKNAME">
+        <input type="text" id="nickname" placeholder="ВАШ НИКНЕЙМ">
         <div class="key-row">
-            <input type="text" id="code" placeholder="ACCESS KEY" style="flex: 1;">
-            <button id="spinBtn" onclick="doSpin()">SPIN</button>
+            <input type="text" id="code" placeholder="ВАШ КЛЮЧ ДОСТУПА" style="flex: 1;">
+            <button id="spinBtn" onclick="doSpin()">КРУТИТЬ</button>
         </div>
     </div>
 </div>
@@ -162,9 +140,14 @@
 
     let prizes = [];
 
-    // ГРАДИЕНТЫ ДЛЯ СЕКТОРОВ
-    const goldGrad = '#ffd700'; // Текстурированное золото
-    const redGrad = '#8b0000';  // Глубокий красный
+    // Создаем неоновое свечение для сектора
+    function createNeonGradient(color, angle, arc) {
+        const grad = ctx.createRadialGradient(190, 190, 0, 190, 190, 190);
+        grad.addColorStop(0, '#10101a'); // Темный центр
+        grad.addColorStop(0.85, color);  // Яркий цвет из таблицы
+        grad.addColorStop(1, '#000');    // Затемнение у края
+        return grad;
+    }
 
     function drawWheel(list) {
         const segments = list.length;
@@ -173,47 +156,40 @@
 
         list.forEach((item, i) => {
             const angle = i * arc;
-            const isGoldSegment = i % 2 === 0;
-
-            // Рисуем сектор
-            ctx.fillStyle = isGoldSegment ? goldGrad : redGrad;
+            
+            // Задаем неоновый градиент
+            ctx.fillStyle = createNeonGradient(item.color || '#444', angle, arc);
+            
             ctx.beginPath();
             ctx.moveTo(190, 190);
             ctx.arc(190, 190, 185, angle, angle + arc);
             ctx.fill();
 
-            // Золотая разделительная нить
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+            // Четкая золотистая разделительная нить
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.25)';
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // ТЕКСТ ПРИЗА
+            // ТЕКСТ ПРИЗА (Белый, уменьшенный)
             ctx.save();
             ctx.translate(190, 190);
             ctx.rotate(angle + arc / 2);
             ctx.textAlign = "right";
-            
-            // Логика текста: Красный на золоте, Бело-Золотой на красном
-            if (isGoldSegment) {
-                ctx.fillStyle = "#8b0000"; // Красный текст
-            } else {
-                ctx.fillStyle = "#fff"; // Бело-Золотой текст
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = "rgba(255, 215, 0, 0.8)"; 
-            }
-
-            ctx.font = "bold 11px Arial";
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = item.color;
+            ctx.font = "bold 10px Arial";
             ctx.fillText(item.name.toUpperCase(), 170, 5);
             ctx.restore();
         });
 
-        // Центральная «золотая» втулка
+        // Центральная декоративная втулка
         ctx.beginPath();
         ctx.arc(190, 190, 20, 0, Math.PI * 2);
         ctx.fillStyle = '#141414';
         ctx.fill();
         ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.stroke();
     }
 
@@ -223,7 +199,7 @@
             const data = await res.json();
             prizes = data.prizes; 
             drawWheel(prizes);
-        } catch(e) { console.error("Error", e); }
+        } catch(e) { console.error("Error loading prizes", e); }
     }
 
     async function doSpin() {
@@ -234,7 +210,7 @@
         const code = codeInput.value.trim();
         const nick = nickInput.value.trim();
 
-        if(!code || !nick) return alert("Please enter all data!");
+        if(!code || !nick) return alert("Введите все данные!");
         btn.disabled = true;
 
         try {
@@ -252,14 +228,16 @@
             }
 
             const totalSegments = data.total_segments;
-            const stopAngle = 270 - ((data.index * (360/totalSegments)) + (180/totalSegments));
+            const segmentAngle = 360 / totalSegments;
+            const prizeCenterAngle = (data.index * segmentAngle) + (segmentAngle / 2);
+            const stopAngle = 270 - prizeCenterAngle;
             const totalRotation = 3600 + stopAngle;
 
-            canvas.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.15, 1)';
+            canvas.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0.1, 1)';
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
-                alert(`CONGRATULATIONS! YOU WON: ${data.prize}`);
+                alert(`ПОЗДРАВЛЯЕМ! ВЫ ВЫИГРАЛИ: ${data.prize}`);
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 btn.disabled = false;
@@ -267,7 +245,7 @@
             }, 6500);
 
         } catch (e) {
-            alert("Connection error");
+            alert("Ошибка связи");
             btn.disabled = false;
         }
     }
