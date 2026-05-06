@@ -41,7 +41,7 @@
             border-radius: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
             text-align: center;
-            width: 480px;
+            width: 520px; /* Немного расширил под крупный текст */
             z-index: 10;
         }
 
@@ -75,17 +75,18 @@
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
             align-items: center;
         }
 
+        /* Поля ввода с размером 26px */
         input {
-            width: 85%;
+            width: 90%;
             background: #ffffff;
             border: none;
-            padding: 14px 20px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 18px 20px;
+            border-radius: 15px;
+            font-size: 26px; /* Твой запрос */
             color: #333;
             outline: none;
             text-align: center;
@@ -95,29 +96,32 @@
 
         .key-row {
             display: flex;
-            width: 93%;
+            width: 98%;
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
         }
 
         #code {
             flex: 1;
-            padding: 14px;
+            padding: 18px;
             border: none;
             text-align: center;
+            font-size: 26px; /* Твой запрос */
         }
 
+        /* Кнопка с размером 26px */
         #spinBtn {
             background: #7c4dff;
             color: #fff;
             border: none;
-            padding: 0 25px;
+            padding: 0 30px;
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.3s;
             font-family: 'Trebuchet MS', sans-serif;
             font-weight: 900;
+            font-size: 26px; /* Твой запрос */
         }
 
         #spinBtn:hover:not(:disabled) {
@@ -129,12 +133,12 @@
             color: #9ca3af;
         }
 
-        /* ОКНО ВЫВОДА ПРИЗА */
+        /* Окно выигрыша с размером 26px */
         #winDisplay {
-            display: none; /* По умолчанию скрыто */
-            margin-top: 20px;
+            display: none;
+            margin-top: 25px;
             color: #ffcc00;
-            font-size: 22px;
+            font-size: 26px; /* Твой запрос */
             font-weight: 900;
             text-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
             animation: fadeInWin 0.5s ease-out;
@@ -225,7 +229,6 @@
 
         if(!code || !nick) return alert("Заполните поля!");
         
-        // Скрываем прошлый выигрыш перед новым броском
         winDisplay.style.display = 'none';
         btn.disabled = true;
 
@@ -252,11 +255,9 @@
             canvas.style.transform = `rotate(${totalRotation}deg)`;
 
             setTimeout(() => {
-                // Заменяем alert на текстовое поле и конфетти
                 prizeText.innerText = data.prize;
                 winDisplay.style.display = 'block';
 
-                // Запуск эффекта конфетти
                 confetti({
                     particleCount: 150,
                     spread: 70,
