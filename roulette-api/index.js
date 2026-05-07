@@ -6,10 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ID твоей таблицы
 const SHEET_ID = "1EzLQpw13NtoJK2EEXRmRsezRvz3sAOOC_DXNFvXcQyw";
 
-// Авторизация через Secret File на Render
 const auth = new google.auth.GoogleAuth({
   keyFile: './secrets.json', 
   scopes: ['https://www.googleapis.com/auth/spreadsheets']
@@ -17,7 +15,7 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({ version: 'v4', auth });
 
-// 1. Получаем список призов (учитываем 4 колонки: имя, шанс, склад, цвет)
+// 1. Получаем список призов
 async function getPrizes() {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
@@ -28,37 +26,54 @@ async function getPrizes() {
   if (!rows || rows.length === 0) return [];
 
   return rows
-    .filter(r => r[0] && r[1]) // Убираем пустые строки
-    .map((r, index) => ({ 
-      name: r[0], 
-      chance: Number(r[1]), 
-      stock: Number(r[2]) || 0, // Колонка C: Количество
-      color: r[3] || "#333333", // Колонка D: Цвет
-      rowNum: index + 2         // Номер строки для обновления склада
-    }));
+    .filter(r => r[0] && r[1]) 
+    .map((r, index) => {
+      // Очистка шанса: заменяем запятую на точку и убираем лишние символы
+      const rawChance = String(r[1]).replace(',', '.');
+      return { 
+        name: r[0], 
+        chance: parseFloat(rawChance) || 0, 
+        stock: parseInt(r[2]) || 0,
+        color: r[3] || "#333333",
+        rowNum: index + 2
+      };
+    });
 }
 
-// 2. Рандом (выбираем только из тех, что есть в наличии)
+// 2. ИСПРАВЛЕННЫЙ РАНДОМ
 function weightedRandom(prizes) {
-  const availablePrizes = prizes.filter(p => p.stock > 0);
+  // Выбираем только те, что реально есть на складе и у которых шанс > 0
+  const availablePrizes = prizes.filter(p => p.stock > 0 && p.chance > 0);
+  
   if (availablePrizes.length === 0) return null;
 
-  const total = availablePrizes.reduce((sum, p) => sum + p.chance, 0);
-  let rand = Math.random() * total;
+  // Считаем сумму шансов
+  const totalWeight = availablePrizes.reduce((sum, p) => sum + p.chance, 0);
+  
+  // Генерируем случайное число от 0 до totalWeight
+  let rand = Math.random() * totalWeight;
+  
+  console.log(`--- Spin Log ---`);
+  console.log(`Total weight: ${totalWeight}, Random roll: ${rand}`);
+
   for (let p of availablePrizes) {
-    if (rand < p.chance) return p;
+    if (rand < p.chance) {
+      console.log(`Winner selected: ${p.name} (Chance: ${p.chance})`);
+      return p;
+    }
     rand -= p.chance;
   }
-  return availablePrizes[0];
+  
+  // На случай математической погрешности возвращаем последний элемент
+  return availablePrizes[availablePrizes.length - 1];
 }
 
-// 3. Эндпоинт для отрисовки колеса (отдает имена и цвета)
+// 3. Эндпоинт для отрисовки колеса
 app.get('/get_prizes_list', async (req, res) => {
   try {
     const prizes = await getPrizes();
     if (prizes.length === 0) return res.json({ prizes: [] });
     
-    // Передаем и имя, и цвет для фронтенда
     res.json({ 
       prizes: prizes.map(p => ({ name: p.name, color: p.color })) 
     });
@@ -73,7 +88,6 @@ app.post('/spin', async (req, res) => {
   const { code, nickname } = req.body;
 
   try {
-    // Проверка ключей
     const codesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range: 'keys!A2:D' 
@@ -85,7 +99,6 @@ app.post('/spin', async (req, res) => {
     if (rowIndex === -1) return res.json({ success: false, message: "Код не найден!" });
     if (rows[rowIndex][1] === "TRUE") return res.json({ success: false, message: "Код уже использован!" });
 
-    // Получаем призы и выбираем победителя
     const allPrizes = await getPrizes();
     const prize = weightedRandom(allPrizes);
 
@@ -93,10 +106,8 @@ app.post('/spin', async (req, res) => {
 
     const prizeIndexInList = allPrizes.findIndex(p => p.name === prize.name);
 
-    // ОБНОВЛЕНИЕ ТАБЛИЦЫ (За один раз обновляем и ключ, и склад)
-    
-    // 1. Помечаем ключ как использованный
     const keyRow = rowIndex + 2;
+    // Обновляем ключ
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
       range: `keys!B${keyRow}:D${keyRow}`,
@@ -104,7 +115,7 @@ app.post('/spin', async (req, res) => {
       resource: { values: [["TRUE", nickname, prize.name]] }
     });
 
-    // 2. Уменьшаем количество призов на складе (Колонка C)
+    // Уменьшаем склад
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
       range: `prizes!C${prize.rowNum}`,
